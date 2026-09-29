@@ -68,6 +68,88 @@ const locationData = {
   "Puducherry": ["Karaikal", "Mahe", "Puducherry", "Yanam"]
 }
 
+function analyseGrievance(text) {
+  const complaint = text.toLowerCase()
+
+  // Basic language detection for prototype
+  const hasHindi = /[\u0900-\u097F]/.test(text)
+
+  const language = hasHindi ? 'Hindi' : 'English'
+
+  let category = 'General Grievance'
+  let priority = 'NORMAL'
+
+  // Demonstration-only keyword rules
+  const urgentWords = [
+    'threat',
+    'threatened',
+    'violence',
+    'attack',
+    'assault',
+    'danger',
+    'emergency',
+    'धमकी',
+    'हमला',
+    'खतरा'
+  ]
+
+  const discriminationWords = [
+    'discrimination',
+    'caste',
+    'caste-based',
+    'जाति',
+    'भेदभाव'
+  ]
+
+  const propertyWords = [
+    'property',
+    'land',
+    'house',
+    'भूमि',
+    'जमीन',
+    'घर'
+  ]
+
+  const humiliationWords = [
+    'insult',
+    'abuse',
+    'humiliated',
+    'humiliation',
+    'अपमान',
+    'गाली'
+  ]
+
+  if (urgentWords.some(word => complaint.includes(word))) {
+    priority = 'HIGH'
+  }
+
+  if (discriminationWords.some(word => complaint.includes(word))) {
+    category = 'Caste-based Discrimination'
+  } else if (propertyWords.some(word => complaint.includes(word))) {
+    category = 'Property / Land Related Grievance'
+  } else if (humiliationWords.some(word => complaint.includes(word))) {
+    category = 'Harassment / Humiliation'
+  }
+
+  let summary =
+    'The grievance has been received and requires review by an authorised official.'
+
+  if (priority === 'HIGH') {
+    summary =
+      'The grievance contains indicators that may require urgent attention. Priority review by an authorised official is recommended.'
+  } else if (category !== 'General Grievance') {
+    summary =
+      `The grievance contains information associated with ${category.toLowerCase()}. Review and classification by an authorised official is recommended.`
+  }
+
+  return {
+    language,
+    category,
+    priority,
+    summary
+  }
+}
+
 function App() {
   const [page, setPage] = useState('home')
   const [grievance, setGrievance] = useState({
@@ -78,6 +160,117 @@ function App() {
   description: '',
   consent: false
 })
+
+const analysis = analyseGrievance(grievance.description)
+
+if (page === 'analysis') {
+  return (
+    <div className="form-page">
+
+      <header className="top-header">
+        <div className="gov-title">
+          <h2>National Helpline Against Atrocities</h2>
+          <p>Ministry of Social Justice & Empowerment</p>
+          <p>Government of India</p>
+        </div>
+
+        <div className="helpline">
+          <span>24×7 Toll Free Helpline</span>
+          <strong>14566</strong>
+        </div>
+      </header>
+
+      <nav className="navbar">
+        <span
+          className="logo"
+          onClick={() => setPage('home')}
+          style={{ cursor: 'pointer' }}
+        >
+          NHAA
+        </span>
+
+        <span className="prototype-label">
+          AI Assisted Grievance System — Prototype
+        </span>
+      </nav>
+
+      <div className="analysis-container">
+
+        <p className="step-text">STEP 2 OF 3</p>
+        <h1>Grievance Analysis</h1>
+
+        <p className="analysis-subtitle">
+          The submitted grievance has been analysed to assist
+          authorised officials with prioritisation and routing.
+        </p>
+
+        <div className="analysis-success">
+          ✓ Analysis completed successfully
+        </div>
+
+        <div className="analysis-grid">
+
+          <div className="analysis-card">
+            <span>Detected Language</span>
+            <strong>{analysis.language}</strong>
+          </div>
+
+          <div className="analysis-card">
+            <span>Case Category</span>
+            <strong>{analysis.category}</strong>
+          </div>
+
+          <div className="analysis-card priority-card">
+            <span>Suggested Priority</span>
+            <strong>{analysis.priority}</strong>
+          </div>
+
+          <div className="analysis-card">
+            <span>Location</span>
+            <strong>
+              {grievance.district}, {grievance.state}
+            </strong>
+          </div>
+
+        </div>
+
+        <div className="summary-card">
+          <h3>Automated Preliminary Summary</h3>
+
+          <p>
+  {analysis.summary}
+</p>
+        </div>
+
+        <div className="human-review">
+          <strong>Human Review Required</strong>
+          <p>
+            AI recommendations assist officials with triage and routing.
+            Final classification and action remain with authorised
+            government officials.
+          </p>
+        </div>
+
+        <div className="analysis-actions">
+          <button
+            className="secondary-btn analysis-button"
+            onClick={() => setPage('register')}
+          >
+            ← Edit Grievance
+          </button>
+
+          <button
+            className="submit-grievance"
+            onClick={() => setPage('routing')}
+          >
+            Confirm & Route Case →
+          </button>
+        </div>
+
+      </div>
+    </div>
+  )
+}
   if (page === 'register') {
   return (
     <div className="form-page">
